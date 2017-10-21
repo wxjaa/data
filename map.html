@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>终端智慧运营大数据平台</title>
+    <meta name="keywords" content="终端,大数据" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- basic styles -->
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css" />
+    <![endif]-->
+    <!-- page specific plugin styles -->
+    <!-- fonts -->
+
+    <!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400,300" />-->
+
+    <!-- ace styles -->
+
+    <link rel="stylesheet" href="assets/css/ace.min.css" />
+    <link rel="stylesheet" href="assets/css/ace-rtl.min.css" />
+    <link rel="stylesheet" href="assets/css/ace-skins.min.css" />
+
+    <!--[if lte IE 8]>
+    <link rel="stylesheet" href="assets/css/ace-ie.min.css" />
+    <![endif]-->
+
+    <!-- inline styles related to this page -->
+
+    <!-- ace settings handler -->
+
+    <script src="assets/js/ace-extra.min.js"></script>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+
+    <!--[if lt IE 9]>
+    <script src="assets/js/html5shiv.js"></script>
+    <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    .orderType {
+        display: inline-block;
+        font-size: 18px;
+        padding: 8px 25px
+    }
+
+    .orderType ~ .orderType {
+        margin-left: -5px;
+    }
+
+    .active.orderType {
+        background: #0293FD;
+        color: #fff
+    }
+    body,html{
+        min-height: 800px;
+        height:100%;
+    }
+</style>
+<body>
+<div id="container" class="container" style="height:100%">
+
+</div>
+</body>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=lZUUt9OlU34uCaA0tNt29btqd0IpyxHW"></script>
+<!--[if !IE]> -->
+
+<script src="assets/js/jquery-2.0.3.min.js"></script>
+
+<!-- <![endif]-->
+
+<!--[if IE]>
+<script src="assets/js/jquery-1.10.2.min.js"></script>
+<![endif]-->
+
+<!--[if !IE]> -->
+
+<script type="text/javascript">
+    window.jQuery || document.write("<script src='assets/js/jquery-2.0.3.min.js'>"+"<"+"script>");
+</script>
+
+<!-- <![endif]-->
+
+<!--[if IE]>
+<script type="text/javascript">
+    window.jQuery || document.write("<script src='assets/js/jquery-1.10.2.min.js'>"+"<"+"script>");
+</script>
+<![endif]-->
+
+<script type="text/javascript">
+    if("ontouchend" in document) document.write("<script src='assets/js/jquery.mobile.custom.min.js'>"+"<"+"script>");
+</script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/typeahead-bs2.min.js"></script>
+
+<!-- page specific plugin scripts -->
+
+<!--[if lte IE 8]>
+<script src="assets/js/excanvas.min.js"></script>
+<![endif]-->
+
+<script src="assets/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="assets/js/jquery.ui.touch-punch.min.js"></script>
+<script src="assets/js/jquery.slimscroll.min.js"></script>
+<script src="assets/js/jquery.easy-pie-chart.min.js"></script>
+<script src="assets/js/jquery.sparkline.min.js"></script>
+<script src="assets/js/flot/jquery.flot.min.js"></script>
+<script src="assets/js/flot/jquery.flot.pie.min.js"></script>
+<script src="assets/js/flot/jquery.flot.resize.min.js"></script>
+<!-- ace scripts -->
+<script src="assets/js/ace-elements.min.js"></script>
+<script src="assets/js/ace.min.js"></script>
+<script>
+    var map = new BMap.Map("container");          // 创建地图实例
+    var point = new BMap.Point(116.404, 39.915);  // 创建点坐标
+    map.centerAndZoom(point, 15);
+    map.enableScrollWheelZoom(true);
+    function myFun(result){
+        var cityName = result.name;
+        map.centerAndZoom(cityName,14);
+        var bounds = map.getBounds();
+        console.log(bounds)
+        var sw = bounds.getSouthWest();
+        var ne = bounds.getNorthEast();
+        var lngSpan = Math.abs(sw.lng - ne.lng);
+        var latSpan = Math.abs(ne.lat - sw.lat);
+        for (var i = 0; i < 25; i ++) {
+            var point = new BMap.Point(sw.lng + lngSpan * (Math.random() * 0.7), ne.lat - latSpan * (Math.random() * 0.7));
+            var marker = new BMap.Marker(point);  // 创建标注
+            addMarker(point);
+            addClickHandler(marker);
+        }
+    }
+    // 复杂的自定义覆盖物
+    function ComplexCustomOverlay(point, text, mouseoverText){
+        this._point = point;
+        this._text = text;
+        this._overText = mouseoverText;
+    }
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    ComplexCustomOverlay.prototype.initialize = function(map){
+        this._map = map;
+        var div = this._div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+        div.style.backgroundColor = "#EE5D5B";
+        div.style.border = "1px solid #BC3B3A";
+        div.style.color = "white";
+        div.style.height = "18px";
+        div.style.padding = "2px";
+        div.style.lineHeight = "18px";
+        div.style.whiteSpace = "nowrap";
+        div.style.MozUserSelect = "none";
+        div.style.fontSize = "12px"
+        var span = this._span = document.createElement("span");
+        div.appendChild(span);
+        span.appendChild(document.createTextNode(this._text));
+        var that = this;
+
+        var arrow = this._arrow = document.createElement("div");
+        arrow.style.background = "url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat";
+        arrow.style.position = "absolute";
+        arrow.style.width = "11px";
+        arrow.style.height = "10px";
+        arrow.style.top = "22px";
+        arrow.style.left = "10px";
+        arrow.style.overflow = "hidden";
+        div.appendChild(arrow);
+
+        div.onmouseover = function(){
+            this.style.backgroundColor = "#6BADCA";
+            this.style.borderColor = "#0000ff";
+            this.getElementsByTagName("span")[0].innerHTML = that._overText;
+            arrow.style.backgroundPosition = "0px -20px";
+        }
+
+        div.onmouseout = function(){
+            this.style.backgroundColor = "#EE5D5B";
+            this.style.borderColor = "#BC3B3A";
+            this.getElementsByTagName("span")[0].innerHTML = that._text;
+            arrow.style.backgroundPosition = "0px 0px";
+        }
+
+        mp.getPanes().labelPane.appendChild(div);
+
+        return div;
+    }
+    ComplexCustomOverlay.prototype.draw = function(){
+        var map = this._map;
+        var pixel = map.pointToOverlayPixel(this._point);
+        this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+        this._div.style.top  = pixel.y - 30 + "px";
+    }
+    var txt = "银湖海岸城", mouseoverTxt = txt + " " + parseInt(Math.random() * 1000,10) + "套" ;
+
+    var myCompOverlay = new ComplexCustomOverlay(new BMap.Point(116.407845,39.914101), "银湖海岸城",mouseoverTxt);
+
+    mp.addOverlay(myCompOverlay);
+
+    var myCity = new BMap.LocalCity();
+    myCity.get(myFun);
+    map.addEventListener("zoomend", function(){
+        //   alert("地图缩放至：" + this.getZoom() + "级");
+    });
+    function addClickHandler(marker){
+        marker.addEventListener("click",function(e){
+            //  openInfo(sContent,e)
+            console.log(e)
+        });
+    }
+    function openInfo(sContent,e){
+        var p = e.target;
+        var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+        var infoWindow = new BMap.InfoWindow(sContent);  // 创建信息窗口对象
+        map.openInfoWindow(infoWindow,point); //开启信息窗口
+    }
+    // 编写自定义函数,创建标注
+    function addMarker(point){
+        var marker = new BMap.Marker(point);
+        map.addOverlay(marker);
+    }
+    // 随机向地图添加25个标注
+
+    var json={
+        "#000":'',
+
+    }
+</script>
+</html>
